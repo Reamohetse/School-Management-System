@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Que Technical Institute — Management System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --sidebar-1:#241b3f;
+  --sidebar-2:#3d2a63;
+  --sidebar-accent:#ff8a5c;
+  --bg:#f6f4fb;
+  --surface:#ffffff;
+  --line:#e7e1f5;
+  --ink:#241b3f;
+  --muted:#7b7290;
+  --indigo:#5b4bdb;
+  --indigo-d:#4636b0;
+  --teal:#0fa3a3;
+  --teal-d:#0c8484;
+  --amber:#f0a83a;
+  --amber-d:#d68f24;
+  --coral:#f0645a;
+  --coral-d:#d9483e;
+  --emerald:#2fb673;
+  --emerald-d:#219359;
+  --violet:#9b6bd6;
+  --violet-d:#7c4fc2;
+  --gold:#e0b13a;
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{ height:100%; }
+body{
+  margin:0; color:var(--ink);
+  font-family: "Segoe UI", Arial, sans-serif;
+  min-height:100vh;
+  background:
+    linear-gradient(190deg, rgba(20,14,36,.55), rgba(20,14,36,.72)),
+    url("assets/background.jpg") center 20%/cover no-repeat fixed;
+}
+h1,h2,h3,.brand-name{ font-family: Georgia, 'Times New Roman', serif; }
+.app{
+  display:flex; min-height:calc(100vh - 44px); margin:22px;
+  border-radius:22px; overflow:hidden; box-shadow:0 30px 70px rgba(10,6,26,.5);
+}
+.sidebar{
+  width:250px; flex-shrink:0;
+  background:linear-gradient(190deg,rgba(36,27,63,.94),rgba(61,42,99,.90));
+  backdrop-filter:blur(8px);
+  color:#efe9ff; display:flex; flex-direction:column; padding:26px 16px; position:relative;
+}
+.sidebar::after{ content:""; position:absolute; top:0; right:0; width:4px; height:100%; background:linear-gradient(180deg,var(--sidebar-accent),var(--teal),var(--indigo)); }
+.brand{ display:flex; flex-direction:column; align-items:center; text-align:center; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,.14); margin-bottom:20px;}
+.brand-ring{ width:92px; height:92px; border-radius:50%; padding:5px; background:conic-gradient(from 220deg, var(--gold), var(--sidebar-accent), var(--teal), var(--indigo), var(--gold)); margin-bottom:12px; box-shadow:0 6px 18px rgba(0,0,0,.35);}
+.brand-ring img{ width:100%; height:100%; border-radius:50%; background:#fff; padding:8px; display:block; object-fit:contain; }
+.brand-name{ font-size:25px; font-weight:700; letter-spacing:.6px; line-height:1.1; }
+.brand-inst{ font-size:12.5px; color:#e7defd; letter-spacing:1.5px; text-transform:uppercase; margin-top:3px; font-weight:600;}
+.brand-line{ width:38px; height:2px; background:var(--sidebar-accent); margin:9px auto; border-radius:2px;}
+.brand-tag{ font-size:10.5px; color:var(--sidebar-accent); letter-spacing:.6px; font-style:italic; }
+.nav{ display:flex; flex-direction:column; gap:5px; margin-top:6px; }
+.nav button{
+  all:unset; cursor:pointer; padding:12px 13px; border-radius:11px; color:#d9d0f5;
+  font-size:14px; display:flex; align-items:center; gap:12px; transition:.15s;
+}
+.nav button .icon{ width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.08); flex-shrink:0;}
+.nav button .icon svg{ width:17px; height:17px; stroke:#efe9ff; fill:none; stroke-width:1.8; }
+.nav button:hover{ background:rgba(255,255,255,.09); color:#fff; }
+.nav button.active{ background:#fff; color:var(--sidebar-1); font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.25);}
+.nav button.active .icon{ background:var(--nav-color,#5b4bdb); }
+.nav button.active .icon svg{ stroke:#fff; }
+.side-foot{ margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,.14); font-size:11.5px; color:#c8bff0; text-align:center; }
+.side-foot b{ color:#fff; }
+.main{ flex:1; padding:28px 36px; overflow-x:hidden; overflow-y:auto; background:rgba(248,247,252,.96); backdrop-filter:blur(3px); }
+.topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:10px;}
+.topbar h1{ margin:0; font-size:27px; color:var(--ink); }
+.topbar .tag{ font-size:13px; color:var(--muted); margin-top:2px; }
+.pill{ background:#fff; border:1px solid var(--line); border-radius:20px; padding:7px 16px; font-size:12.5px; color:var(--indigo-d); font-weight:700; box-shadow:0 2px 6px rgba(91,75,219,.08);}
+.cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px; margin-bottom:26px; }
+.card{ background:var(--surface); border-radius:var(--radius); padding:18px 20px; box-shadow:0 4px 16px rgba(60,40,120,.07); border-top:4px solid var(--card-color,#5b4bdb); position:relative; overflow:hidden;}
+.card .icon-bubble{ position:absolute; right:14px; top:14px; width:36px; height:36px; border-radius:10px; background:var(--card-color,#5b4bdb); opacity:.13; }
+.card .label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin-bottom:8px; font-weight:700;}
+.card .value{ font-size:26px; font-weight:800; color:var(--ink); font-family:Georgia,serif; }
+.card .sub{ font-size:12px; color:var(--muted); margin-top:5px;}
+.panel{ background:var(--surface); border-radius:var(--radius); padding:22px; margin-bottom:22px; box-shadow:0 4px 16px rgba(60,40,120,.06);}
+.panel h2{ margin:0 0 16px 0; font-size:18px; color:var(--ink); display:flex; align-items:center; gap:9px;}
+.panel h2 .h-icon{ width:30px; height:30px; border-radius:9px; background:#f1eefd; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.panel h2 .h-icon svg{ width:16px; height:16px; stroke:var(--indigo-d); fill:none; stroke-width:1.8;}
+.row-flex{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px;}
+select, input[type=text], input[type=number]{
+  font-family:inherit; padding:9px 12px; border:1.5px solid var(--line); border-radius:9px; background:#fdfcff; font-size:13.5px; color:var(--ink);
+}
+select:focus, input:focus{ outline:none; border-color:var(--indigo); }
+input[type=number]{ width:100px; }
+button.btn{
+  all:unset; cursor:pointer; background:linear-gradient(135deg,var(--indigo),var(--indigo-d)); color:#fff; padding:10px 18px; border-radius:9px; font-size:13.5px; font-weight:700;
+  box-shadow:0 3px 10px rgba(91,75,219,.3); transition:.15s; display:inline-flex; align-items:center; gap:7px;
+}
+button.btn svg{ width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2;}
+button.btn:hover{ transform:translateY(-1px); box-shadow:0 5px 14px rgba(91,75,219,.4); }
+button.btn.ghost{ background:#fff; color:var(--indigo-d); border:1.5px solid var(--indigo); box-shadow:none;}
+button.btn.ghost svg{ stroke:var(--indigo-d); }
+button.btn.ghost:hover{ background:#f1eefd; transform:none;}
+button.btn.small{ padding:6px 12px; font-size:12px; }
+button.btn.danger{ background:linear-gradient(135deg,var(--coral),var(--coral-d)); box-shadow:0 3px 10px rgba(240,100,90,.3);}
+button.btn.teal{ background:linear-gradient(135deg,var(--teal),var(--teal-d)); box-shadow:0 3px 10px rgba(15,163,163,.3);}
+button.btn.amber{ background:linear-gradient(135deg,var(--amber),var(--amber-d)); box-shadow:0 3px 10px rgba(240,168,58,.3);}
+button.btn.violet{ background:linear-gradient(135deg,var(--violet),var(--violet-d)); box-shadow:0 3px 10px rgba(155,107,214,.3);}
+button.btn.emerald{ background:linear-gradient(135deg,var(--emerald),var(--emerald-d)); box-shadow:0 3px 10px rgba(47,182,115,.3);}
+table{ width:100%; border-collapse:collapse; font-size:13px; }
+th{ text-align:left; background:#f1eefd; color:var(--indigo-d); padding:10px 12px; font-size:11.5px; text-transform:uppercase; letter-spacing:.4px; border-bottom:2px solid var(--line); position:sticky; top:0;}
+td{ padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:middle;}
+tr:hover td{ background:#faf9ff; }
+.table-wrap{ max-height:540px; overflow:auto; border:1px solid var(--line); border-radius:10px; }
+.badge{ padding:4px 10px; border-radius:14px; font-size:11px; font-weight:800; white-space:nowrap;}
+.badge.long{ background:#e2f6ec; color:var(--emerald-d); }
+.badge.short{ background:#fdecd0; color:var(--amber-d); }
+.badge.paid{ background:#e2f6ec; color:var(--emerald-d); }
+.badge.owing{ background:#fbe2df; color:var(--coral-d); }
+.balance-ok{ color:var(--emerald-d); font-weight:800;}
+.balance-bad{ color:var(--coral-d); font-weight:800;}
+.small-input{ width:92px; }
+.modal-bg{ position:fixed; inset:0; background:rgba(20,14,36,.6); display:flex; align-items:center; justify-content:center; z-index:100; backdrop-filter:blur(3px);}
+.modal{ background:#fff; border-radius:16px; padding:28px; width:430px; max-width:92vw; max-height:88vh; overflow:auto; box-shadow:0 25px 60px rgba(10,6,26,.4);}
+.modal.wide{ width:520px; }
+.modal h3{ margin-top:0; color:var(--indigo-d); display:flex; align-items:center; gap:9px;}
+.field{ margin-bottom:13px; display:flex; flex-direction:column; gap:5px;}
+.field label{ font-size:12.5px; color:var(--muted); font-weight:700;}
+.field select, .field input{ width:100%; }
+.hidden{ display:none !important; }
+.foot-note{ font-size:11px; color:var(--muted); margin-top:20px; }
+.empty{ padding:34px; text-align:center; color:var(--muted); font-size:13.5px; }
+.term-block{ border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; background:#faf9ff;}
+.term-block h4{ margin:0 0 10px 0; font-size:13.5px; color:var(--indigo-d);}
+.division-badge{ padding:4px 11px; border-radius:14px; font-size:11px; font-weight:800; white-space:nowrap; display:inline-block;}
+.div-dist{ background:#e2f6ec; color:var(--emerald-d);}
+.div-first{ background:#e5f0fb; color:#2f7fb6;}
+.div-second{ background:#fdf3d6; color:var(--amber-d);}
+.div-third{ background:#fde7d0; color:#c17324;}
+.div-notcomp{ background:#fbe2df; color:var(--coral-d);}
+.div-repeat{ background:#f6dada; color:#b52f24;}
+.view-row{ display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed var(--line); font-size:13.5px;}
+.view-row b{ color:var(--ink); }
+.toast{ position:fixed; bottom:24px; right:24px; background:var(--indigo-d); color:#fff; padding:13px 22px; border-radius:10px; font-size:13.5px; box-shadow:0 8px 22px rgba(70,54,176,.4); z-index:200; opacity:0; transform:translateY(10px); transition:.25s;}
+.toast.show{ opacity:1; transform:translateY(0); }
+.note{ font-size:12.5px; color:var(--indigo-d); background:#f1eefd; border-left:4px solid var(--indigo); padding:10px 14px; border-radius:8px; margin-bottom:16px;}
+.chip-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+.chip{ padding:6px 14px; border-radius:16px; background:#f1eefd; color:var(--indigo-d); font-size:12.5px; font-weight:700; }
+@media(max-width:800px){
+  .app{ flex-direction:column; margin:0; border-radius:0; }
+  .sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; padding:16px; }
+  .sidebar::after{ display:none; }
+  .brand{ border:none; padding:0; margin:0; width:100%; }
+  .side-foot{ margin-top:8px; width:100%; }
+  .main{ padding:20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="appRoot" class="app">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-ring"><img src="assets/logo.png" alt="logo"></div>
+      <div class="brand-name">Que</div>
+      <div class="brand-inst">Technical Institute</div>
+      <div class="brand-line"></div>
+      <div class="brand-tag">Modern Minds. Modern Creatives.</div>
+    </div>
+    <div class="nav" id="navList"></div>
+    <div class="side-foot">School Management System<br><span style="opacity:.8;">Ha Pita, Nts'irele</span><br><span style="opacity:.8;">+(266) 63146060</span></div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="tag" id="pageTag">Overview of the institute</div>
+      </div>
+      <div class="pill" id="dateTag"></div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ---------------------------- ICONS (professional line icons) ---------------------------- */
+const ICONS = {
+  dashboard: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7" height="7.5" rx="1.6"/><rect x="3" y="13" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13" width="7" height="7.5" rx="1.6"/></svg>`,
+  students: `<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.1"/><path d="M3 20c0-3.4 2.7-6.1 6-6.1s6 2.7 6 6.1"/><circle cx="17.3" cy="9.2" r="2.3"/><path d="M15.7 14.4c2.5.5 4.3 2.6 4.3 5.2"/></svg>`,
+  fees: `<svg viewBox="0 0 24 24"><rect x="2.3" y="5" width="19.4" height="14" rx="2.3"/><line x1="2.3" y1="9.6" x2="21.7" y2="9.6"/><line x1="5.8" y1="14.6" x2="10" y2="14.6"/><line x1="13" y1="14.6" x2="15.5" y2="14.6"/></svg>`,
+  toolbox: `<svg viewBox="0 0 24 24"><rect x="2.3" y="8" width="19.4" height="12" rx="2.2"/><path d="M8 8V6.2A2.2 2.2 0 0 1 10.2 4h3.6a2.2 2.2 0 0 1 2.2 2.2V8"/><line x1="2.3" y1="13.3" x2="21.7" y2="13.3"/><line x1="10.7" y1="13.3" x2="13.3" y2="13.3"/></svg>`,
+  uniform: `<svg viewBox="0 0 24 24"><path d="M8.2 3.2L12 5.4l3.8-2.2 4 3.3-3 2.9v10.4a1 1 0 0 1-1 1H8.2a1 1 0 0 1-1-1V9.4l-3-2.9z"/></svg>`,
+  results: `<svg viewBox="0 0 24 24"><circle cx="12" cy="8.3" r="5.1"/><path d="M9 12.8L7.4 21l4.6-2.8 4.6 2.8-1.6-8.2"/></svg>`,
+  reports: `<svg viewBox="0 0 24 24"><path d="M6.2 2.2h8.4l4.6 4.6v14.6a1 1 0 0 1-1 1H6.2a1 1 0 0 1-1-1V3.2a1 1 0 0 1 1-1z"/><path d="M14.6 2.2v4.6a1 1 0 0 0 1 1h4.6"/><line x1="8.4" y1="13.4" x2="15.6" y2="13.4"/><line x1="8.4" y1="17.2" x2="15.6" y2="17.2"/></svg>`,
+  add: `<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  edit: `<svg viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9.5 7V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v2"/><path d="M6.5 7l1 12a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-12"/></svg>`,
+  entry: `<svg viewBox="0 0 24 24"><path d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M14 3v5.5h5"/><path d="M9.2 13.6l1.9 1.9 3.7-4"/></svg>`,
+  eye: `<svg viewBox="0 0 24 24"><path d="M2.5 12s3.4-6.3 9.5-6.3S21.5 12 21.5 12s-3.4 6.3-9.5 6.3S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.7"/></svg>`,
+  download: `<svg viewBox="0 0 24 24"><path d="M12 3v12.5"/><path d="M7 11l5 5 5-5"/><path d="M4.5 19.5h15"/></svg>`,
+  print: `<svg viewBox="0 0 24 24"><path d="M6.5 8.5V3.5h11v5"/><rect x="3.5" y="8.5" width="17" height="8.5" rx="1.6"/><rect x="6.5" y="13" width="11" height="7.5" rx="0.8"/><line x1="7.7" y1="11.2" x2="10" y2="11.2"/></svg>`,
+};
+const INSTITUTE_ADDRESS = "Ha Pita, Nts'irele";
+const INSTITUTE_CONTACT = "+(266) 63146060";
+
+/* ---------------------------- CONFIG ---------------------------- */
+const COURSES = {
+  "Carpentry & Joinery":        { type:"Long",  monthlyFee:1200, totalFee:14400 },
+  "Plumbing":                    { type:"Long",  monthlyFee:1200, totalFee:14400 },
+  "Electrical Installation":     { type:"Long",  monthlyFee:1200, totalFee:14400 },
+  "Interior Design":             { type:"Short", monthlyFee:1500, totalFee:9000  },
+  "Leather Works & Upholstery":  { type:"Short", monthlyFee:1500, totalFee:9000  },
+};
+const TOOLBOX_TOTAL = 4500;
+const UNIFORM_TOTAL = 1000;
+const INTAKES = ["January","August"];
+const STORAGE_KEY = "qti:students";
+const SEED_STUDENTS = [{"firstName": "Leketa", "lastName": "Serabele", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tsepang", "lastName": "Tsebe", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Lebohang", "lastName": "Lerata", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tumelo", "lastName": "Raphael", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tlotliso", "lastName": "Lerabe", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Lebohang", "lastName": "Mputsoe", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tseliso", "lastName": "Ntelekoa", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Toka", "lastName": "Machaba", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tshomo", "lastName": "Cwekane", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Thabo", "lastName": "Qhobosheane", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Thabelo", "lastName": "Mphou", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Vusi", "lastName": "Mphuthi", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Retsepile", "lastName": "Sempe", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Ramahabanye", "lastName": "Ramahahanye", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Mohale", "lastName": "Moeletsi", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tlali", "lastName": "Mabea", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Itumeleng", "lastName": "Motalingoane", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Lebajoa", "lastName": "Sekoala", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Sthembile", "lastName": "Mosotho", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Kamohelo", "lastName": "Ramajale", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tebello", "lastName": "Ramots'Abi", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Letsie", "lastName": "Letsie", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Mapaseka", "lastName": "Kaloli", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Motonela", "lastName": "Konyana", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Leqhaoe", "lastName": "Matamane", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tlotliso", "lastName": "Malla", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Mpolokeng", "lastName": "Thene", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Lisemelo", "lastName": "Tuoane", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Mpho", "lastName": "Ramaqoma", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Khotso", "lastName": "Molapo", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Lehlohonolo", "lastName": "Letsapo", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Moeketsi", "lastName": "Sehloho", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Ts'Eliso", "lastName": "Matsosa", "course": "Carpentry & Joinery", "intake": "January"}, {"firstName": "Tsepo", "lastName": "Ramosa", "course": "Plumbing", "intake": "January"}, {"firstName": "Neo", "lastName": "Moliko", "course": "Plumbing", "intake": "January"}, {"firstName": "Macozene", "lastName": "Leisa", "course": "Plumbing", "intake": "January"}, {"firstName": "Thabo", "lastName": "Malapane", "course": "Plumbing", "intake": "January"}, {"firstName": "Tsepo", "lastName": "Ramosa", "course": "Electrical Installation", "intake": "January"}, {"firstName": "Makoanyane", "lastName": "Masothonyane", "course": "Electrical Installation", "intake": "January"}, {"firstName": "Semaele", "lastName": "Khadebe", "course": "Electrical Installation", "intake": "January"}, {"firstName": "Seabiso", "lastName": "Ralebea", "course": "Electrical Installation", "intake": "January"}, {"firstName": "Teboho", "lastName": "Kopano", "course": "Interior Design", "intake": "January"}, {"firstName": "Teboho", "lastName": "Moiloa", "course": "Interior Design", "intake": "January"}, {"firstName": "Mosa", "lastName": "Kereseane", "course": "Interior Design", "intake": "January"}, {"firstName": "Rebone", "lastName": "Khothatso", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Rorisang", "lastName": "Ramolata", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Katleho", "lastName": "Ramohanoe", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Kamohelo", "lastName": "Khitsane", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Tsoanelo", "lastName": "Hashe", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Teboho", "lastName": "Moiloa", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Malefetsane", "lastName": "Morenyane", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Poloko", "lastName": "Tema", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Mosehle", "lastName": "Makatise", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Tsepo", "lastName": "Mohapeloa", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Kopano", "lastName": "Mphuthi", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Katiso", "lastName": "Letele", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Chaole", "lastName": "Chaole", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Tumisang", "lastName": "Mohapi", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Phoka", "lastName": "Ntsohi", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Khitsane", "lastName": "Moloisane", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Bongali", "lastName": "Tlou", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Sello", "lastName": "Thoahlane", "course": "Carpentry & Joinery", "intake": "August"}, {"firstName": "Retselisitsoe", "lastName": "Napo", "course": "Plumbing", "intake": "August"}, {"firstName": "Mothibe", "lastName": "Thamae", "course": "Plumbing", "intake": "August"}, {"firstName": "Mohlomi", "lastName": "Jonathan", "course": "Plumbing", "intake": "August"}, {"firstName": "Lehlohonolo", "lastName": "Zwane", "course": "Electrical Installation", "intake": "August"}, {"firstName": "Tsepo", "lastName": "Mohapeloa", "course": "Electrical Installation", "intake": "August"}, {"firstName": "Tlotla", "lastName": "Khanare", "course": "Electrical Installation", "intake": "August"}, {"firstName": "Mothusi", "lastName": "Thibeli", "course": "Electrical Installation", "intake": "August"}, {"firstName": "Sebabatso", "lastName": "Sekonyela", "course": "Electrical Installation", "intake": "August"}, {"firstName": "Pulane", "lastName": "Letsie", "course": "Interior Design", "intake": "August"}, {"firstName": "Rorisang", "lastName": "Ramolata", "course": "Interior Design", "intake": "August"}, {"firstName": "Malehloa", "lastName": "Jesia", "course": "Interior Design", "intake": "August"}, {"firstName": "Lehlokoe", "lastName": "", "course": "Interior Design", "intake": "August"}];
+const LOGO_PATH = "assets/logo.png";
+let _logoDataUrl = null;
+function getLogoDataUrl(){
+  if(_logoDataUrl) return Promise.resolve(_logoDataUrl);
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width; canvas.height = img.height;
+      canvas.getContext("2d").drawImage(img,0,0);
+      _logoDataUrl = canvas.toDataURL("image/png");
+      resolve(_logoDataUrl);
+    };
+    img.onerror = ()=> resolve(null);
+    img.src = LOGO_PATH;
+  });
+}
+
+let students = [];
+let activeTab = "dashboard";
+let filterIntake = "All";
+let filterCourse = "All";
+
+/* ---------------------------- STORAGE (browser localStorage) ---------------------------- */
+async function loadStudents(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    students = raw ? JSON.parse(raw) : null;
+  }catch(e){
+    students = null;
+  }
+  if(!students){
+    students = SEED_STUDENTS.map(s => ({
+      id: uid(),
+      firstName: s.firstName,
+      lastName: s.lastName,
+      intake: s.intake,
+      course: s.course,
+      feesPaid: 0,
+      toolboxPaid: 0,
+      uniformPaid: 0,
+      results: { term1: emptyResultTerm(), term2: emptyResultTerm() }
+    }));
+    await saveStudents();
+  }
+}
+async function saveStudents(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+  }catch(e){ console.error("Storage save failed", e); }
+}
+
+/* ---------------------------- HELPERS ---------------------------- */
+function uid(){ return "S" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function money(n){ return "M" + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+function divisionFromPct(p){
+  if(p>=85) return { label:"Passed with Distinction", cls:"div-dist" };
+  if(p>=75) return { label:"First Division", cls:"div-first" };
+  if(p>=60) return { label:"Second Division", cls:"div-second" };
+  if(p>=50) return { label:"Third Division", cls:"div-third" };
+  if(p>=40) return { label:"Not Competent", cls:"div-notcomp" };
+  return { label:"Repeat", cls:"div-repeat" };
+}
+function emptyResultTerm(){
+  return { theoryScore:null, theoryMax:100, theoryWeight:40, practicalScore:null, practicalMax:100, practicalWeight:60 };
+}
+function termPercentage(term){
+  let total = 0, any=false;
+  if(term.theoryScore!==null && term.theoryScore!==undefined && term.theoryScore!==""){
+    total += (Number(term.theoryScore)/Number(term.theoryMax||100)) * Number(term.theoryWeight||0);
+    any = true;
+  }
+  if(term.practicalScore!==null && term.practicalScore!==undefined && term.practicalScore!==""){
+    total += (Number(term.practicalScore)/Number(term.practicalMax||100)) * Number(term.practicalWeight||0);
+    any = true;
+  }
+  return any ? total : null;
+}
+function filteredStudents(){
+  return students.filter(s => (filterIntake==="All" || s.intake===filterIntake) && (filterCourse==="All" || s.course===filterCourse));
+}
+function courseBadge(course){
+  const t = COURSES[course] ? COURSES[course].type : "Long";
+  return `<span class="badge ${t==="Long"?"long":"short"}">${t}-Term</span>`;
+}
+function filterBar(){
+  return `<div class="row-flex">
+      <label style="font-size:13px;color:var(--muted);font-weight:600;">Intake:</label>
+      <select onchange="filterIntake=this.value; render();">
+        <option ${filterIntake==="All"?"selected":""}>All</option>
+        ${INTAKES.map(i=>`<option ${filterIntake===i?"selected":""}>${i}</option>`).join("")}
+      </select>
+      <label style="font-size:13px;color:var(--muted);font-weight:600;margin-left:8px;">Course:</label>
+      <select onchange="filterCourse=this.value; render();">
+        <option value="All" ${filterCourse==="All"?"selected":""}>All Courses</option>
+        ${Object.keys(COURSES).map(cn=>`<option value="${cn}" ${filterCourse===cn?"selected":""}>${cn}</option>`).join("")}
+      </select>
+    </div>`;
+}
+
+/* ---------------------------- NAV ---------------------------- */
+const NAV_ITEMS = [
+  { id:"dashboard", label:"Dashboard", color:"#5b4bdb" },
+  { id:"students",  label:"Students",  color:"#0fa3a3" },
+  { id:"fees",      label:"School Fees", color:"#5b4bdb" },
+  { id:"toolbox",   label:"Tool-Box",  color:"#f0a83a" },
+  { id:"uniform",   label:"Uniform",   color:"#9b6bd6" },
+  { id:"results",   label:"Academics / Results", color:"#f0645a" },
+  { id:"reports",   label:"Reports (PDF)", color:"#2fb673" },
+];
+function buildNav(){
+  const nav = document.getElementById("navList");
+  nav.innerHTML = "";
+  NAV_ITEMS.forEach(item=>{
+    const b = document.createElement("button");
+    b.style.setProperty("--nav-color", item.color);
+    b.innerHTML = `<span class="icon">${ICONS[item.id]}</span> ${item.label}`;
+    b.className = activeTab===item.id ? "active":"";
+    b.onclick = ()=>{ activeTab=item.id; buildNav(); render(); };
+    nav.appendChild(b);
+  });
+}
+
+/* ---------------------------- RENDER ROOT ---------------------------- */
+const TITLES = {
+  dashboard:["Dashboard","Overview of the institute"],
+  students:["Students","Manage learner records, course and intake"],
+  fees:["School Fees","Long-term M1,200/mo · M14,400 total  —  Short-term M1,500/mo · M9,000 total"],
+  toolbox:["Tool-Box","Total payable per student: M4,500"],
+  uniform:["School Uniform","Total payable per student: M1,000"],
+  results:["Academics / Results","Term 1 & Term 2 — Theory and Practical assessment"],
+  reports:["Reports","Generate a downloadable PDF for one category at a time"],
+};
+function render(){
+  const [title,tag] = TITLES[activeTab];
+  document.getElementById("pageTitle").textContent = title;
+  document.getElementById("pageTag").textContent = tag;
+  document.getElementById("dateTag").textContent = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  const c = document.getElementById("content");
+  if(activeTab==="dashboard") c.innerHTML = renderDashboard();
+  else if(activeTab==="students") renderStudents(c);
+  else if(activeTab==="fees") renderFees(c);
+  else if(activeTab==="toolbox") renderToolbox(c);
+  else if(activeTab==="uniform") renderUniform(c);
+  else if(activeTab==="results") renderResults(c);
+  else if(activeTab==="reports") renderReports(c);
+}
+
+/* ---------------------------- DASHBOARD ---------------------------- */
+function renderDashboard(){
+  const total = students.length;
+  const jan = students.filter(s=>s.intake==="January").length;
+  const aug = students.filter(s=>s.intake==="August").length;
+  let feesCollected=0, feesExpected=0, toolboxCollected=0, uniformCollected=0;
+  students.forEach(s=>{
+    const cf = COURSES[s.course];
+    feesExpected += cf ? cf.totalFee : 0;
+    feesCollected += Number(s.feesPaid||0);
+    toolboxCollected += Number(s.toolboxPaid||0);
+    uniformCollected += Number(s.uniformPaid||0);
+  });
+  const byCourse = Object.keys(COURSES).map((c,idx)=>{
+    const n = students.filter(s=>s.course===c).length;
+    const colors = ["#5b4bdb","#0fa3a3","#f0a83a","#9b6bd6","#f0645a"];
+    const pct = total? Math.round((n/total)*100):0;
+    return `<tr><td>${c}</td><td>${courseBadge(c)}</td><td>${n}</td>
+      <td><div style="background:#eee;border-radius:6px;overflow:hidden;height:8px;width:140px;"><div style="width:${pct}%;height:100%;background:${colors[idx%colors.length]};"></div></div></td></tr>`;
+  }).join("");
+  return `
+  <div class="cards">
+    <div class="card" style="--card-color:#5b4bdb"><div class="icon-bubble"></div><div class="label">Total Students</div><div class="value">${total}</div><div class="sub">Jan intake ${jan} · Aug intake ${aug}</div></div>
+    <div class="card" style="--card-color:#2fb673"><div class="icon-bubble"></div><div class="label">Fees Collected</div><div class="value">${money(feesCollected)}</div><div class="sub">of ${money(feesExpected)} expected</div></div>
+    <div class="card" style="--card-color:#f0645a"><div class="icon-bubble"></div><div class="label">Fees Outstanding</div><div class="value">${money(Math.max(feesExpected-feesCollected,0))}</div><div class="sub">across all students</div></div>
+    <div class="card" style="--card-color:#f0a83a"><div class="icon-bubble"></div><div class="label">Tool-Box Collected</div><div class="value">${money(toolboxCollected)}</div><div class="sub">of ${money(TOOLBOX_TOTAL*total)} expected</div></div>
+    <div class="card" style="--card-color:#9b6bd6"><div class="icon-bubble"></div><div class="label">Uniform Collected</div><div class="value">${money(uniformCollected)}</div><div class="sub">of ${money(UNIFORM_TOTAL*total)} expected</div></div>
+  </div>
+  <div class="panel">
+    <h2><span class="h-icon">${ICONS.students}</span> Enrolment by course</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Course</th><th>Duration</th><th># Students</th><th>Share</th></tr></thead>
+      <tbody>${byCourse || `<tr><td colspan="4" class="empty">No students added yet</td></tr>`}</tbody>
+    </table></div>
+  </div>`;
+}
+
+/* ---------------------------- STUDENTS ---------------------------- */
+function renderStudents(c){
+  const rows = filteredStudents().map(s=>{
+    const cf = COURSES[s.course] || {};
+    return `<tr>
+      <td>${s.firstName}</td><td>${s.lastName}</td>
+      <td>${s.intake}</td>
+      <td>${s.course}</td>
+      <td>${courseBadge(s.course)}</td>
+      <td>${money(cf.monthlyFee)}</td>
+      <td>
+        <button class="btn small ghost" onclick="openEditStudent('${s.id}')">${ICONS.edit} Edit</button>
+        <button class="btn small danger" onclick="deleteStudent('${s.id}')">${ICONS.trash} Delete</button>
+      </td>
+    </tr>`;
+  }).join("");
+  c.innerHTML = `
+    <div class="row-flex" style="justify-content:space-between;">
+      ${filterBar()}
+      <button class="btn" onclick="openAddStudent()">${ICONS.add} Add Student</button>
+    </div>
+    <div class="chip-row">
+      <span class="chip">Total shown: ${filteredStudents().length}</span>
+    </div>
+    <div class="panel">
+      <div class="table-wrap"><table>
+        <thead><tr><th>First Name</th><th>Surname</th><th>Intake</th><th>Course</th><th>Type</th><th>Monthly Fee</th><th>Actions</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="7" class="empty">No students found. Click “Add Student” to begin.</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+}
+function openAddStudent(){ openStudentModal(null); }
+function openEditStudent(id){ openStudentModal(students.find(s=>s.id===id)); }
+function openStudentModal(student){
+  const editing = !!student;
+  const s = student || { id:uid(), firstName:"", lastName:"", intake:"January", course:Object.keys(COURSES)[0], feesPaid:0, toolboxPaid:0, uniformPaid:0, results:{term1:emptyResultTerm(), term2:emptyResultTerm()} };
+  const bg = document.createElement("div");
+  bg.className = "modal-bg";
+  bg.innerHTML = `
+    <div class="modal">
+      <h3>${ICONS[editing?"edit":"add"]} ${editing?"Edit":"Add"} Student</h3>
+      <div class="field"><label>First Name</label><input id="mFirst" type="text" value="${s.firstName}"></div>
+      <div class="field"><label>Surname</label><input id="mLast" type="text" value="${s.lastName}"></div>
+      <div class="field"><label>Intake</label>
+        <select id="mIntake">${INTAKES.map(i=>`<option ${s.intake===i?"selected":""}>${i}</option>`).join("")}</select>
+      </div>
+      <div class="field"><label>Course</label>
+        <select id="mCourse">${Object.keys(COURSES).map(cn=>`<option ${s.course===cn?"selected":""}>${cn}</option>`).join("")}</select>
+      </div>
+      <div class="note">Long-term courses: M1,200/month · M14,400 total. Short-term courses: M1,500/month · M9,000 total. Fee is set automatically from the course chosen.</div>
+      <div class="row-flex" style="justify-content:flex-end">
+        <button class="btn ghost" onclick="this.closest('.modal-bg').remove()">Cancel</button>
+        <button class="btn" onclick="saveStudent('${s.id}', ${editing})">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+  window._editingBase = s;
+}
+async function saveStudent(id, editing){
+  const firstName = document.getElementById("mFirst").value.trim();
+  const lastName = document.getElementById("mLast").value.trim();
+  const intake = document.getElementById("mIntake").value;
+  const course = document.getElementById("mCourse").value;
+  if(!firstName || !lastName){ showToast("Please enter first name and surname"); return; }
+  if(editing){
+    const s = students.find(x=>x.id===id);
+    Object.assign(s, {firstName,lastName,intake,course});
+  } else {
+    const base = window._editingBase;
+    base.firstName=firstName; base.lastName=lastName; base.intake=intake; base.course=course;
+    students.push(base);
+  }
+  await saveStudents();
+  document.querySelector(".modal-bg").remove();
+  showToast("Student saved");
+  render();
+}
+async function deleteStudent(id){
+  if(!confirm("Remove this student and all their records? This cannot be undone.")) return;
+  students = students.filter(s=>s.id!==id);
+  await saveStudents();
+  showToast("Student removed");
+  render();
+}
+
+/* ---------------------------- FEES ---------------------------- */
+function renderFees(c){
+  const rows = filteredStudents().map(s=>{
+    const cf = COURSES[s.course] || {monthlyFee:0,totalFee:0};
+    const paid = Number(s.feesPaid||0);
+    const bal = Math.max(cf.totalFee - paid, 0);
+    return `<tr>
+      <td>${s.firstName} ${s.lastName}</td>
+      <td>${s.intake}</td>
+      <td>${s.course}</td>
+      <td>${money(cf.monthlyFee)}</td>
+      <td>${money(cf.totalFee)}</td>
+      <td><input type="number" class="small-input" value="${paid}" min="0" onchange="updateFee('${s.id}', this.value, ${cf.totalFee})"></td>
+      <td class="${bal<=0?'balance-ok':'balance-bad'}">${money(bal)}</td>
+      <td>${bal<=0? '<span class="badge paid">Paid Up</span>' : '<span class="badge owing">Owing</span>'}</td>
+    </tr>`;
+  }).join("");
+  c.innerHTML = `
+    ${filterBar()}
+    <div class="panel">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Student</th><th>Intake</th><th>Course</th><th>Monthly</th><th>Total Fee</th><th>Amount Paid</th><th>Balance</th><th>Status</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="8" class="empty">No students found</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+}
+async function updateFee(id, val, total){
+  const s = students.find(x=>x.id===id);
+  let v = Math.max(0, Number(val)||0);
+  if(v>total) v = total;
+  s.feesPaid = v;
+  await saveStudents();
+  showToast("Fee payment updated");
+  render();
+}
+
+/* ---------------------------- TOOLBOX ---------------------------- */
+function renderToolbox(c){
+  const rows = filteredStudents().map(s=>{
+    const paid = Number(s.toolboxPaid||0);
+    const bal = Math.max(TOOLBOX_TOTAL - paid,0);
+    return `<tr>
+      <td>${s.firstName} ${s.lastName}</td><td>${s.intake}</td><td>${s.course}</td>
+      <td><input type="number" class="small-input" value="${paid}" min="0" onchange="updateToolbox('${s.id}', this.value)"></td>
+      <td class="${bal<=0?'balance-ok':'balance-bad'}">${money(bal)}</td>
+      <td>${bal<=0? '<span class="badge paid">Paid</span>' : '<span class="badge owing">Owing</span>'}</td>
+    </tr>`;
+  }).join("");
+  c.innerHTML = `
+    ${filterBar()}
+    <div class="panel">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Student</th><th>Intake</th><th>Course</th><th>Amount Paid (of ${money(TOOLBOX_TOTAL)})</th><th>Balance</th><th>Status</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="6" class="empty">No students found</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+}
+async function updateToolbox(id, val){
+  const s = students.find(x=>x.id===id);
+  let v = Math.max(0, Number(val)||0);
+  if(v>TOOLBOX_TOTAL) v=TOOLBOX_TOTAL;
+  s.toolboxPaid = v;
+  await saveStudents();
+  showToast("Tool-Box payment updated");
+  render();
+}
+
+/* ---------------------------- UNIFORM ---------------------------- */
+function renderUniform(c){
+  const rows = filteredStudents().map(s=>{
+    const paid = Number(s.uniformPaid||0);
+    const bal = Math.max(UNIFORM_TOTAL - paid,0);
+    return `<tr>
+      <td>${s.firstName} ${s.lastName}</td><td>${s.intake}</td><td>${s.course}</td>
+      <td><input type="number" class="small-input" value="${paid}" min="0" onchange="updateUniform('${s.id}', this.value)"></td>
+      <td class="${bal<=0?'balance-ok':'balance-bad'}">${money(bal)}</td>
+      <td>${bal<=0? '<span class="badge paid">Paid</span>' : '<span class="badge owing">Owing</span>'}</td>
+    </tr>`;
+  }).join("");
+  c.innerHTML = `
+    ${filterBar()}
+    <div class="panel">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Student</th><th>Intake</th><th>Course</th><th>Amount Paid (of ${money(UNIFORM_TOTAL)})</th><th>Balance</th><th>Status</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="6" class="empty">No students found</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+}
+async function updateUniform(id, val){
+  const s = students.find(x=>x.id===id);
+  let v = Math.max(0, Number(val)||0);
+  if(v>UNIFORM_TOTAL) v=UNIFORM_TOTAL;
+  s.uniformPaid = v;
+  await saveStudents();
+  showToast("Uniform payment updated");
+  render();
+}
+
+/* ---------------------------- RESULTS ---------------------------- */
+function ensureResults(s){
+  if(!s.results) s.results = {};
+  if(!s.results.term1) s.results.term1 = emptyResultTerm();
+  if(!s.results.term2) s.results.term2 = emptyResultTerm();
+}
+function renderResults(c){
+  const list = filteredStudents();
+  const rows = list.map(s=>{
+    ensureResults(s);
+    return `<tr>
+      <td>${s.firstName} ${s.lastName}</td>
+      <td>${s.course}</td>
+      <td>${s.intake}</td>
+      <td>
+        <button class="btn small teal" onclick="openEnterMarksModal('${s.id}')">Enter Marks</button>
+        <button class="btn small ghost" onclick="openViewMarksModal('${s.id}')">View Marks</button>
+        <button class="btn small violet" onclick="printIndividualResult('${s.id}')">${ICONS.download} Download PDF</button>
+      </td>
+    </tr>`;
+  }).join("");
+  c.innerHTML = `
+    ${filterBar()}
+    <div class="note">Percentage = (Score ÷ Out of) × Weight, summed across Theory and Practical for each term.<br>
+    Divisions: 85–100 Passed with Distinction · 75–84 First Division · 60–74 Second Division · 50–59 Third Division · 40–49 Not Competent · 0–39 Repeat.</div>
+    <div class="panel">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Student</th><th>Course</th><th>Intake</th><th>Actions</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="4" class="empty">No students found</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+}
+function termFormBlock(termKey, term, label){
+  const pct = termPercentage(term);
+  const div = pct!==null ? divisionFromPct(pct) : null;
+  return `<div class="term-block">
+    <h4>${label}</h4>
+    <div class="row-flex" style="margin-bottom:6px;">
+      <div class="field" style="width:100px"><label>Theory Score</label><input type="number" id="${termKey}_theoryScore" value="${term.theoryScore??""}"></div>
+      <div class="field" style="width:90px"><label>Out of</label><input type="number" id="${termKey}_theoryMax" value="${term.theoryMax??100}"></div>
+      <div class="field" style="width:90px"><label>Weight %</label><input type="number" id="${termKey}_theoryWeight" value="${term.theoryWeight??40}"></div>
+    </div>
+    <div class="row-flex">
+      <div class="field" style="width:100px"><label>Practical Score</label><input type="number" id="${termKey}_practicalScore" value="${term.practicalScore??""}"></div>
+      <div class="field" style="width:90px"><label>Out of</label><input type="number" id="${termKey}_practicalMax" value="${term.practicalMax??100}"></div>
+      <div class="field" style="width:90px"><label>Weight %</label><input type="number" id="${termKey}_practicalWeight" value="${term.practicalWeight??60}"></div>
+    </div>
+    <div style="margin-top:8px;font-size:13px;">Percentage: <b>${pct!==null?pct.toFixed(1)+"%":"—"}</b>
+    &nbsp; ${div?`<span class="division-badge ${div.cls}">${div.label}</span>`:"—"}</div>
+  </div>`;
+}
+function openEnterMarksModal(id){
+  const s = students.find(x=>x.id===id);
+  ensureResults(s);
+  const bg = document.createElement("div");
+  bg.className = "modal-bg";
+  bg.innerHTML = `
+    <div class="modal wide">
+      <h3>Enter Marks — ${s.firstName} ${s.lastName}</h3>
+      <div class="tag" style="margin:-8px 0 12px 0;color:var(--muted);font-size:12.5px;">${s.course} · ${s.intake} Intake</div>
+      ${termFormBlock("t1", s.results.term1, "Term 1")}
+      ${termFormBlock("t2", s.results.term2, "Term 2")}
+      <div class="row-flex" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn ghost" onclick="this.closest('.modal-bg').remove()">Cancel</button>
+        <button class="btn teal" onclick="saveResults('${s.id}')">Save Marks</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+}
+function viewTermBlock(term, label){
+  const pct = termPercentage(term);
+  const div = pct!==null ? divisionFromPct(pct) : null;
+  if(pct===null){
+    return `<div class="term-block"><h4>${label}</h4><div class="empty" style="padding:14px;">No marks entered yet</div></div>`;
+  }
+  return `<div class="term-block">
+    <h4>${label}</h4>
+    <div class="view-row"><span>Theory Score</span><b>${term.theoryScore}/${term.theoryMax} (weight ${term.theoryWeight}%)</b></div>
+    <div class="view-row"><span>Practical Score</span><b>${term.practicalScore}/${term.practicalMax} (weight ${term.practicalWeight}%)</b></div>
+    <div class="view-row" style="border-bottom:none;"><span>Overall Percentage</span><b>${pct.toFixed(1)}%</b></div>
+    <div style="margin-top:6px;"><span class="division-badge ${div.cls}">${div.label}</span></div>
+  </div>`;
+}
+function openViewMarksModal(id){
+  const s = students.find(x=>x.id===id);
+  ensureResults(s);
+  const p1 = termPercentage(s.results.term1);
+  const p2 = termPercentage(s.results.term2);
+  let avgBlock = "";
+  if(p1!==null || p2!==null){
+    const vals = [p1,p2].filter(v=>v!==null);
+    const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+    const avgDiv = divisionFromPct(avg);
+    avgBlock = `<div class="term-block" style="background:#f1eefd;border-color:var(--indigo);">
+      <h4>Overall Average${vals.length<2?" (based on available term)":""}</h4>
+      <div class="view-row" style="border-bottom:none;"><span>Average Percentage</span><b>${avg.toFixed(1)}%</b></div>
+      <div style="margin-top:6px;"><span class="division-badge ${avgDiv.cls}">${avgDiv.label}</span></div>
+    </div>`;
+  }
+  const bg = document.createElement("div");
+  bg.className = "modal-bg";
+  bg.innerHTML = `
+    <div class="modal wide">
+      <h3>Marks Overview — ${s.firstName} ${s.lastName}</h3>
+      <div class="tag" style="margin:-8px 0 12px 0;color:var(--muted);font-size:12.5px;">${s.course} · ${s.intake} Intake</div>
+      ${viewTermBlock(s.results.term1, "Term 1")}
+      ${viewTermBlock(s.results.term2, "Term 2")}
+      ${avgBlock}
+      <div class="row-flex" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn ghost" onclick="this.closest('.modal-bg').remove()">Close</button>
+      </div>
+    </div>`;
+  document.body.appendChild(bg);
+}
+async function saveResults(id){
+  const s = students.find(x=>x.id===id);
+  ["t1","t2"].forEach((tk,idx)=>{
+    const termObj = idx===0? s.results.term1 : s.results.term2;
+    ["theoryScore","theoryMax","theoryWeight","practicalScore","practicalMax","practicalWeight"].forEach(f=>{
+      const el = document.getElementById(`${tk}_${f}`);
+      const v = el.value;
+      termObj[f] = v===""? null : Number(v);
+    });
+  });
+  await saveStudents();
+  document.querySelector(".modal-bg").remove();
+  showToast("Marks saved");
+  render();
+}
+
+/* ---------------------------- REPORTS / PDF ---------------------------- */
+function renderReports(c){
+  const options = ["fees","toolbox","uniform","results"];
+  const labelMap = {fees:"School Fees", toolbox:"Tool-Box", uniform:"Uniform", results:"Academic Results"};
+  c.innerHTML = `
+    <div class="panel">
+      <h2><span class="h-icon">${ICONS.reports}</span> Download a report</h2>
+      <div class="note">Choose exactly one category, intake, and course, then download. Reports are generated one category at a time — you cannot export all categories in a single file.</div>
+      <div class="row-flex">
+        <div class="field" style="width:220px"><label>Category</label>
+          <select id="repCategory">${options.map(o=>`<option value="${o}">${labelMap[o]}</option>`).join("")}</select>
+        </div>
+        <div class="field" style="width:180px"><label>Intake</label>
+          <select id="repIntake"><option>All</option>${INTAKES.map(i=>`<option>${i}</option>`).join("")}</select>
+        </div>
+        <div class="field" style="width:220px"><label>Course (optional)</label>
+          <select id="repCourse"><option value="">All Courses</option>${Object.keys(COURSES).map(cn=>`<option value="${cn}">${cn}</option>`).join("")}</select>
+        </div>
+      </div>
+      <button class="btn emerald" onclick="downloadReport()">${ICONS.download} Download PDF</button>
+    </div>`;
+}
+async function downloadReport(){
+  const category = document.getElementById("repCategory").value;
+  const intake = document.getElementById("repIntake").value;
+  const course = document.getElementById("repCourse").value;
+  let list = students.filter(s => (intake==="All"||s.intake===intake) && (!course||s.course===course));
+  if(!list.length){ showToast("No matching students for this report"); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const labelMap = {fees:"School Fees Report", toolbox:"Tool-Box Report", uniform:"School Uniform Report", results:"Academic Results Report"};
+
+  const logoUrl = await getLogoDataUrl();
+  if(logoUrl) doc.addImage(logoUrl, "PNG", 14, 10, 22, 22);
+  doc.setFont("times","bold"); doc.setFontSize(16);
+  doc.text("Que Technical Institute", 40, 18);
+  doc.setFont("helvetica","normal"); doc.setFontSize(9);
+  doc.text("Modern Minds. Modern Creatives", 40, 24);
+  doc.setFontSize(8); doc.setTextColor(90);
+  doc.text(`${INSTITUTE_ADDRESS}  ·  ${INSTITUTE_CONTACT}`, 40, 29.5);
+  doc.setTextColor(0);
+  doc.setFontSize(11); doc.setFont("helvetica","bold");
+  doc.text(labelMap[category], 40, 36.5);
+  doc.setFont("helvetica","normal"); doc.setFontSize(9);
+  doc.text(`Intake: ${intake}   Course: ${course||"All"}   Generated: ${new Date().toLocaleDateString()}`, 14, 44);
+
+  let head, body;
+  if(category==="fees"){
+    head = [["Student","Intake","Course","Monthly","Total Fee","Paid","Balance","Status"]];
+    body = list.map(s=>{
+      const cf = COURSES[s.course]||{monthlyFee:0,totalFee:0};
+      const paid = Number(s.feesPaid||0); const bal = Math.max(cf.totalFee-paid,0);
+      return [`${s.firstName} ${s.lastName}`, s.intake, s.course, money(cf.monthlyFee), money(cf.totalFee), money(paid), money(bal), bal<=0?"Paid Up":"Owing"];
+    });
+  } else if(category==="toolbox"){
+    head = [["Student","Intake","Course","Paid","Balance","Status"]];
+    body = list.map(s=>{
+      const paid = Number(s.toolboxPaid||0); const bal = Math.max(TOOLBOX_TOTAL-paid,0);
+      return [`${s.firstName} ${s.lastName}`, s.intake, s.course, money(paid), money(bal), bal<=0?"Paid":"Owing"];
+    });
+  } else if(category==="uniform"){
+    head = [["Student","Intake","Course","Paid","Balance","Status"]];
+    body = list.map(s=>{
+      const paid = Number(s.uniformPaid||0); const bal = Math.max(UNIFORM_TOTAL-paid,0);
+      return [`${s.firstName} ${s.lastName}`, s.intake, s.course, money(paid), money(bal), bal<=0?"Paid":"Owing"];
+    });
+  } else if(category==="results"){
+    head = [["Student","Course","Intake","Term 1 %","Term 1 Division","Term 2 %","Term 2 Division"]];
+    body = list.map(s=>{
+      ensureResults(s);
+      const p1 = termPercentage(s.results.term1); const p2 = termPercentage(s.results.term2);
+      const d1 = p1!==null?divisionFromPct(p1).label:"—";
+      const d2 = p2!==null?divisionFromPct(p2).label:"—";
+      return [`${s.firstName} ${s.lastName}`, s.course, s.intake,
+        p1!==null?p1.toFixed(1)+"%":"—", d1,
+        p2!==null?p2.toFixed(1)+"%":"—", d2];
+    });
+  }
+
+  doc.autoTable({ head, body, startY:49, styles:{fontSize:8, cellPadding:3}, headStyles:{fillColor:[91,75,219]} });
+  const fname = `QTI_${category}_${intake}_${Date.now()}.pdf`;
+  doc.save(fname);
+  showToast("PDF downloaded");
+}
+
+/* ---------------------------- INDIVIDUAL RESULT PRINT ---------------------------- */
+async function printIndividualResult(id){
+  const s = students.find(x=>x.id===id);
+  ensureResults(s);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Letterhead
+  const logoUrl = await getLogoDataUrl();
+  if(logoUrl) doc.addImage(logoUrl, "PNG", 14, 12, 26, 26);
+  doc.setFont("times","bold"); doc.setFontSize(19);
+  doc.text("Que Technical Institute", 46, 21);
+  doc.setFont("helvetica","italic"); doc.setFontSize(9.5);
+  doc.text("Modern Minds. Modern Creatives", 46, 27.5);
+  doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(90);
+  doc.text(`${INSTITUTE_ADDRESS}   ·   Tel: ${INSTITUTE_CONTACT}`, 46, 33);
+  doc.setTextColor(0);
+  doc.setDrawColor(91,75,219); doc.setLineWidth(0.9);
+  doc.line(14, 40, 196, 40);
+
+  doc.setFont("helvetica","bold"); doc.setFontSize(13);
+  doc.text("INDIVIDUAL STUDENT RESULT SLIP", 105, 49, {align:"center"});
+
+  // Student info block
+  doc.setFont("helvetica","normal"); doc.setFontSize(10);
+  const infoY = 59;
+  doc.setFont("helvetica","bold"); doc.text("Student Name:", 14, infoY);
+  doc.setFont("helvetica","normal"); doc.text(`${s.firstName} ${s.lastName}`, 52, infoY);
+  doc.setFont("helvetica","bold"); doc.text("Course:", 120, infoY);
+  doc.setFont("helvetica","normal"); doc.text(`${s.course}`, 140, infoY);
+
+  doc.setFont("helvetica","bold"); doc.text("Intake:", 14, infoY+7);
+  doc.setFont("helvetica","normal"); doc.text(`${s.intake}`, 52, infoY+7);
+  doc.setFont("helvetica","bold"); doc.text("Course Type:", 120, infoY+7);
+  doc.setFont("helvetica","normal"); doc.text(`${COURSES[s.course]?COURSES[s.course].type:"—"}-Term`, 140, infoY+7);
+
+  doc.setFont("helvetica","bold"); doc.text("Date Issued:", 14, infoY+14);
+  doc.setFont("helvetica","normal"); doc.text(new Date().toLocaleDateString(), 52, infoY+14);
+
+  // Results table: Term1 & Term2 side by side info as rows
+  const p1 = termPercentage(s.results.term1);
+  const p2 = termPercentage(s.results.term2);
+  const d1 = p1!==null ? divisionFromPct(p1) : null;
+  const d2 = p2!==null ? divisionFromPct(p2) : null;
+
+  const head = [["Term","Theory Score","Practical Score","Overall %","Division"]];
+  const body = [
+    ["Term 1",
+      s.results.term1.theoryScore!==null && s.results.term1.theoryScore!==undefined ? `${s.results.term1.theoryScore}/${s.results.term1.theoryMax} (wt ${s.results.term1.theoryWeight}%)` : "—",
+      s.results.term1.practicalScore!==null && s.results.term1.practicalScore!==undefined ? `${s.results.term1.practicalScore}/${s.results.term1.practicalMax} (wt ${s.results.term1.practicalWeight}%)` : "—",
+      p1!==null? p1.toFixed(1)+"%" : "—",
+      d1? d1.label : "—"],
+    ["Term 2",
+      s.results.term2.theoryScore!==null && s.results.term2.theoryScore!==undefined ? `${s.results.term2.theoryScore}/${s.results.term2.theoryMax} (wt ${s.results.term2.theoryWeight}%)` : "—",
+      s.results.term2.practicalScore!==null && s.results.term2.practicalScore!==undefined ? `${s.results.term2.practicalScore}/${s.results.term2.practicalMax} (wt ${s.results.term2.practicalWeight}%)` : "—",
+      p2!==null? p2.toFixed(1)+"%" : "—",
+      d2? d2.label : "—"],
+  ];
+  doc.autoTable({ head, body, startY: infoY+22, styles:{fontSize:9.5, cellPadding:4}, headStyles:{fillColor:[91,75,219]} });
+
+  let afterTableY = doc.lastAutoTable.finalY + 10;
+  if(p1!==null || p2!==null){
+    const vals = [p1,p2].filter(v=>v!==null);
+    const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+    const avgDiv = divisionFromPct(avg);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10.5);
+    doc.text(`Overall Average: ${avg.toFixed(1)}%  —  ${avgDiv.label}`, 14, afterTableY);
+    afterTableY += 9;
+  }
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(90);
+  doc.text("Division Key: 85-100 Passed with Distinction · 75-84 First Division · 60-74 Second Division", 14, afterTableY);
+  doc.text("50-59 Third Division · 40-49 Not Competent · 0-39 Repeat", 14, afterTableY+5);
+  doc.setTextColor(0);
+
+  const signY = afterTableY + 26;
+  doc.line(14, signY, 80, signY);
+  doc.setFontSize(9); doc.text("Teacher's Signature", 14, signY+5);
+  doc.line(126, signY, 192, signY);
+  doc.text("Institute Stamp", 126, signY+5);
+
+  doc.setFontSize(8); doc.setTextColor(120);
+  doc.text(`Que Technical Institute  ·  ${INSTITUTE_ADDRESS}  ·  Tel: ${INSTITUTE_CONTACT}`, 105, 287, {align:"center"});
+
+  const fname = `QTI_Result_${s.firstName}_${s.lastName}_${Date.now()}.pdf`;
+  doc.save(fname);
+  showToast("Individual result downloaded");
+}
+
+/* ---------------------------- INIT ---------------------------- */
+(async function init(){
+  await loadStudents();
+  buildNav();
+  render();
+})();
+</script>
+</body>
+</html>
